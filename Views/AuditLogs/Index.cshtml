@@ -1,0 +1,82 @@
+@model IEnumerable<AcxiomCRM.Models.AuditLog>
+
+@{
+    ViewData["Title"] = "Audit Logs";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>Audit Logs</h2>
+            <p class="text-muted mb-0">Review recorded CRM events.</p>
+        </div>
+        <span class="badge bg-secondary">@Model.Count() records</span>
+    </div>
+
+    <form method="get" asp-action="Index" class="card card-body mb-4">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Action</label>
+                <input name="actionFilter" value="@ViewBag.ActionFilter" class="form-control"
+                       placeholder="Create, Update, Delete" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Module</label>
+                <input name="module" value="@ViewBag.Module" class="form-control" placeholder="Customer, Lead" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">User ID</label>
+                <input name="userId" value="@ViewBag.UserId" class="form-control" placeholder="User ID" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">From date</label>
+                <input type="date" name="fromDate" value="@ViewBag.FromDate" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">To date</label>
+                <input type="date" name="toDate" value="@ViewBag.ToDate" class="form-control" />
+            </div>
+            <div class="col-md-9 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Timestamp (UTC)</th>
+                    <th>Action</th>
+                    <th>Module</th>
+                    <th>Record ID</th>
+                    <th>User ID</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var log in Model)
+                {
+                    <tr>
+                        <td>@log.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                        <td>@log.Action</td>
+                        <td>@log.EntityName</td>
+                        <td>@(log.RecordId?.ToString() ?? "—")</td>
+                        <td>@log.UserId</td>
+                        <td>@log.Details</td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            No audit records found.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <p class="text-muted small">Showing at most 500 matching records.</p>
+</div>

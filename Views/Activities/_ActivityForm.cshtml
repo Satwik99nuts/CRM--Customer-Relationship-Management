@@ -1,0 +1,58 @@
+@model AcxiomCRM.Models.Activity
+
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+<div class="mb-3">
+    <label asp-for="Subject" class="form-label">Subject</label>
+    <input asp-for="Subject" class="form-control" required />
+    <span asp-validation-for="Subject" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="ActivityType" class="form-label">Activity Type</label>
+    <select asp-for="ActivityType" class="form-select">
+        <option value="Call">Call</option>
+        <option value="Meeting">Meeting</option>
+        <option value="Email">Email</option>
+        <option value="Task">Task</option>
+        <option value="Other">Other</option>
+    </select>
+</div>
+
+<div class="mb-3">
+    <label asp-for="ActivityDate" class="form-label">Date and Time</label>
+    <input asp-for="ActivityDate" type="datetime-local"
+           asp-format="{0:yyyy-MM-ddTHH:mm}"
+           class="form-control" required />
+</div>
+
+<div class="mb-3">
+    <label asp-for="CustomerId" class="form-label">Customer (optional)</label>
+    <select asp-for="CustomerId" asp-items="ViewBag.Customers"
+            class="form-select">
+        <option value="">-- Select Customer --</option>
+    </select>
+</div>
+
+<div class="mb-3">
+    <label asp-for="LeadId" class="form-label">Lead (optional)</label>
+    <select asp-for="LeadId" asp-items="ViewBag.Leads"
+            class="form-select">
+        <option value="">-- Select Lead --</option>
+    </select>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Status" class="form-label">Status</label>
+    <select asp-for="Status" class="form-select">
+        <option value="Planned">Planned</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Completed">Completed</option>
+        <option value="Cancelled">Cancelled</option>
+    </select>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Description" class="form-label">Description</label>
+    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+</div>

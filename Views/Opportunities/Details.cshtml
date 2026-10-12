@@ -1,0 +1,43 @@
+@model AcxiomCRM.Models.Opportunity
+
+@{
+    ViewData["Title"] = "Opportunity Details";
+}
+
+<div class="container py-4">
+    <h1>Opportunity Details</h1>
+    <p class="text-muted">Review the selected sales deal.</p>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+            @Model.OpportunityName
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-4">Opportunity ID</dt>
+                <dd class="col-sm-8">@Model.OpportunityId</dd>
+
+                <dt class="col-sm-4">Customer ID</dt>
+                <dd class="col-sm-8">@Model.CustomerId</dd>
+
+                <dt class="col-sm-4">Amount</dt>
+                <dd class="col-sm-8">@Model.Amount.ToString("N2")</dd>
+
+                <dt class="col-sm-4">Stage</dt>
+                <dd class="col-sm-8">@Model.Stage</dd>
+
+                <dt class="col-sm-4">Probability</dt>
+                <dd class="col-sm-8">@Model.Probability%</dd>
+
+                <dt class="col-sm-4">Expected Close Date</dt>
+                <dd class="col-sm-8">@Model.ExpectedCloseDate.ToString("dd MMM yyyy")</dd>
+
+                <dt class="col-sm-4">Status</dt>
+                <dd class="col-sm-8">@Model.Status</dd>
+            </dl>
+
+            <a asp-action="Edit" asp-route-id="@Model.OpportunityId" class="btn btn-primary">Edit</a>
+            <a asp-action="Index" class="btn btn-secondary">Back to Opportunities</a>
+        </div>
+    </div>
+</div>

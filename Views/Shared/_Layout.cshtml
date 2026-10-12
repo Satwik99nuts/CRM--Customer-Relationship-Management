@@ -1,0 +1,183 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - AcxiomCRM</title>
+
+    <script type="importmap"></script>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/AcxiomCRM.styles.css" asp-append-version="true" />
+
+    <style>
+            :root {
+                --crm-primary: #1e3a5f;
+                --crm-accent: #3b82f6;
+                --crm-background: #f5f7fb;
+            }
+
+            body {
+                background: var(--crm-background);
+                color: #1f2937;
+                min-height: 100vh;
+            }
+
+            .crm-navbar {
+                background: #ffffff;
+                border-bottom: 1px solid #e5e7eb;
+            }
+
+            .crm-brand {
+                color: var(--crm-primary) !important;
+                font-size: 1.35rem;
+                font-weight: 800;
+                letter-spacing: -0.5px;
+            }
+
+            .crm-brand span {
+                color: var(--crm-accent);
+            }
+
+            .navbar-nav .nav-link {
+                color: #4b5563 !important;
+                font-weight: 500;
+                padding: 0.65rem 0.8rem !important;
+                border-radius: 7px;
+                transition: background 0.2s ease;
+            }
+
+            .navbar-nav .nav-link:hover {
+                color: var(--crm-accent) !important;
+                background: #eff6ff;
+            }
+
+            .crm-main {
+                min-height: calc(100vh - 150px);
+                padding-top: 1.5rem;
+                padding-bottom: 2.5rem;
+            }
+
+            .crm-footer {
+                background: #ffffff;
+                border-top: 1px solid #e5e7eb;
+                padding: 1rem 0;
+                font-size: 0.9rem;
+            }
+
+            .crm-footer a {
+                color: var(--crm-accent);
+                text-decoration: none;
+            }
+
+            .crm-footer a:hover {
+                text-decoration: underline;
+            }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg crm-navbar shadow-sm">
+            <div class="container-fluid px-lg-4">
+
+                <a class="navbar-brand crm-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    Acxiom<span>CRM</span>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#crmNavbar"
+                        aria-controls="crmNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="crmNavbar">
+
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">
+                                Dashboard
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Customers" asp-action="Index">
+                                Customers
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Leads" asp-action="Index">
+                                Leads
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Opportunities" asp-action="Index">
+                                Opportunities
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="FollowUps" asp-action="Index">
+                                Follow-ups
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Activities" asp-action="Index">
+                                Activities
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="AuditLogs" asp-action="Index">
+                                Audit Logs
+                            </a>
+                        </li>
+
+                    </ul>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted small d-none d-lg-inline">
+                            Customer Relationship Management
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container-fluid px-lg-4">
+        <main role="main" class="crm-main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="crm-footer">
+        <div class="container-fluid px-lg-4 d-flex flex-column flex-sm-row
+            justify-content-between align-items-center gap-2">
+
+            <span>
+                &copy; @DateTime.Now.Year AcxiomCRM. All rights reserved.
+            </span>
+
+            <a asp-controller="Home" asp-action="Privacy">
+                Privacy Policy
+            </a>
+
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

@@ -1,0 +1,21 @@
+@model AcxiomCRM.Models.Activity
+
+@{
+    ViewData["Title"] = "Add Activity";
+}
+
+<div class="container py-4">
+    <h1>Add Activity</h1>
+    <p class="text-muted">Record a customer or lead interaction.</p>
+
+    <form asp-action="Create" method="post">
+        <partial name="_ActivityForm" model="Model" />
+
+        <button type="submit" class="btn btn-primary">Save Activity</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

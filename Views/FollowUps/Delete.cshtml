@@ -1,0 +1,28 @@
+@model AcxiomCRM.Models.FollowUp
+
+@{
+    ViewData["Title"] = "Delete Follow-Up";
+}
+
+<div class="container py-4">
+    <h1>Delete Follow-Up</h1>
+
+    <div class="alert alert-warning">
+        Are you sure you want to permanently delete this follow-up?
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5>@Model.Subject</h5>
+            <p><strong>Type:</strong> @Model.Type</p>
+            <p><strong>Date:</strong> @Model.FollowUpDate.ToString("dd MMM yyyy HH:mm")</p>
+            <p><strong>Status:</strong> @Model.Status</p>
+        </div>
+    </div>
+
+    <form asp-action="Delete" asp-route-id="@Model.FollowUpId" method="post">
+        <input type="hidden" asp-for="FollowUpId" />
+        <button type="submit" class="btn btn-danger">Confirm Delete</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>

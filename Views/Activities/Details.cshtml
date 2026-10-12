@@ -1,0 +1,26 @@
+@model AcxiomCRM.Models.Activity
+
+@{
+    ViewData["Title"] = "Activity Details";
+}
+
+<div class="container py-4">
+    <h1>Activity Details</h1>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h4>@Model.Subject</h4>
+            <hr />
+
+            <p><strong>Type:</strong> @Model.ActivityType</p>
+            <p><strong>Date:</strong> @Model.ActivityDate.ToString("dd MMM yyyy HH:mm")</p>
+            <p><strong>Customer:</strong> @(Model.Customer?.CustomerName ?? "-")</p>
+            <p><strong>Lead:</strong> @(Model.Lead?.LeadName ?? "-")</p>
+            <p><strong>Status:</strong> @Model.Status</p>
+            <p><strong>Description:</strong> @Model.Description</p>
+
+            <a asp-action="Edit" asp-route-id="@Model.ActivityId" class="btn btn-primary">Edit</a>
+            <a asp-action="Index" class="btn btn-secondary">Back</a>
+        </div>
+    </div>
+</div>

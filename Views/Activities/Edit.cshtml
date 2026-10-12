@@ -1,0 +1,22 @@
+@model AcxiomCRM.Models.Activity
+
+@{
+    ViewData["Title"] = "Edit Activity";
+}
+
+<div class="container py-4">
+    <h1>Edit Activity</h1>
+
+    <form asp-action="Edit" asp-route-id="@Model.ActivityId" method="post">
+        <input type="hidden" asp-for="ActivityId" />
+
+        <partial name="_ActivityForm" model="Model" />
+
+        <button type="submit" class="btn btn-primary">Update Activity</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

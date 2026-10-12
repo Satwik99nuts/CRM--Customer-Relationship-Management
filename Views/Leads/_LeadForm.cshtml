@@ -1,0 +1,58 @@
+
+@model AcxiomCRM.Models.Lead
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label asp-for="LeadName" class="form-label">Lead Name</label>
+        <input asp-for="LeadName" class="form-control" />
+        <span asp-validation-for="LeadName" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <label asp-for="CompanyName" class="form-label">Company</label>
+        <input asp-for="CompanyName" class="form-control" />
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <label asp-for="Email" class="form-label">Email</label>
+        <input asp-for="Email" type="email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <label asp-for="Phone" class="form-label">Phone</label>
+        <input asp-for="Phone" class="form-control" />
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <label asp-for="Source" class="form-label">Lead Source</label>
+        <select asp-for="Source" class="form-select">
+            <option>Website</option>
+            <option>Referral</option>
+            <option>Social Media</option>
+            <option>Advertisement</option>
+            <option>Cold Call</option>
+            <option>Other</option>
+        </select>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <label asp-for="Status" class="form-label">Status</label>
+        <select asp-for="Status" class="form-select">
+            <option>New</option>
+            <option>Contacted</option>
+            <option>Qualified</option>
+            <option>Converted</option>
+            <option>Lost</option>
+        </select>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <label asp-for="ExpectedValue" class="form-label">Expected Value</label>
+        <input asp-for="ExpectedValue" type="number" min="0"
+               step="0.01" class="form-control" />
+        <span asp-validation-for="ExpectedValue" class="text-danger"></span>
+    </div>
+</div>

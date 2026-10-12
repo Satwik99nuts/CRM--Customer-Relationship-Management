@@ -1,0 +1,26 @@
+@model AcxiomCRM.Models.FollowUp
+
+@{
+    ViewData["Title"] = "Follow-Up Details";
+}
+
+<div class="container py-4">
+    <h1>Follow-Up Details</h1>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h4>@Model.Subject</h4>
+            <hr />
+
+            <p><strong>Type:</strong> @Model.Type</p>
+            <p><strong>Date:</strong> @Model.FollowUpDate.ToString("dd MMM yyyy HH:mm")</p>
+            <p><strong>Customer:</strong> @(Model.Customer?.CustomerName ?? "-")</p>
+            <p><strong>Lead:</strong> @(Model.Lead?.LeadName ?? "-")</p>
+            <p><strong>Status:</strong> @Model.Status</p>
+            <p><strong>Remarks:</strong> @Model.Remarks</p>
+
+            <a asp-action="Edit" asp-route-id="@Model.FollowUpId" class="btn btn-primary">Edit</a>
+            <a asp-action="Index" class="btn btn-secondary">Back</a>
+        </div>
+    </div>
+</div>

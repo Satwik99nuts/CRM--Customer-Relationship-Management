@@ -1,0 +1,192 @@
+﻿@model IEnumerable<AcxiomCRM.Models.Activity>
+
+@{
+    ViewData["Title"] = "Dashboard";
+    var stages = ViewBag.StageCounts;
+}
+
+<div class="container-fluid py-3">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold">CRM Dashboard</h1>
+            <p class="text-muted mb-0">
+                Overview of your customers, sales pipeline and activities.
+            </p>
+        </div>
+        <span class="badge bg-primary p-2">AcxiomCRM</span>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">Total Customers</p>
+                    <h2 class="fw-bold">@ViewBag.TotalCustomers</h2>
+                    <a asp-controller="Customers" asp-action="Index" class="small text-decoration-none">View customers
+                        →</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="text-muted mb-2">Total Leads</p>
+                        <h2 class="fw-bold">@ViewBag.TotalLeads</h2>
+                        <a asp-controller="Leads" asp-action="Index" class="small text-decoration-none">View leads →</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="text-muted mb-2">Opportunities</p>
+                        <h2 class="fw-bold">@ViewBag.TotalOpportunities</h2>
+                        <a asp-controller="Opportunities" asp-action="Index" class="small text-decoration-none">View
+                            opportunities →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <p class="text-muted mb-2">Open Pipeline Value</p>
+                            <h2 class="fw-bold">
+                                @(((decimal)ViewBag.PipelineValue).ToString("N2"))
+                            </h2>
+                            <small class="text-muted">Open opportunities only</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <p class="text-muted mb-2">Pending Follow-Ups</p>
+                            <h2 class="fw-bold">@ViewBag.PendingFollowUps</h2>
+                            <a asp-controller="FollowUps" asp-action="Index" class="small text-decoration-none">View follow-ups
+                                →</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <p class="text-muted mb-2">Completed Activities</p>
+                                <h2 class="fw-bold">@ViewBag.CompletedActivities</h2>
+                                <a asp-controller="Activities" asp-action="Index" class="small text-decoration-none">View activities
+                                    →</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-lg-5">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="mb-0">Sales Pipeline by Stage</h5>
+                                </div>
+                                <div class="card-body">
+                                    @if (stages != null && stages.Count > 0)
+                                    {
+                                        @foreach (var stage in stages)
+                                        {
+                                            <div class="mb-4">
+                                                <div class="d-flex justify-content-between mb-1">
+                                                    <span class="fw-semibold">@stage.Stage</span>
+                                                    <span class="text-muted">
+                                                        @stage.Count deals
+                                                    </span>
+                                                </div>
+
+                                                <div class="progress" style="height: 10px;">
+                                                    <div class="progress-bar" role="progressbar"
+                                                         style="width: @(ViewBag.TotalOpportunities == 0 ? 0 : (stage.Count * 100.0 / ViewBag.TotalOpportunities))%">
+                                                    </div>
+                                                </div>
+
+                                                <small class="text-muted">
+                                                    Value: @(((decimal)stage.Value).ToString("N2"))
+                                                </small>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted mb-0">
+                                            No opportunities available yet.
+                                        </p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-7">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-white py-3 d-flex justify-content-between">
+                                    <h5 class="mb-0">Recent Activities</h5>
+                                    <a asp-controller="Activities" asp-action="Index" class="text-decoration-none">View all</a>
+                                </div>
+
+                                <div class="card-body">
+                                    @if (Model.Any())
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-hover align-middle">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Subject</th>
+                                                        <th>Type</th>
+                                                        <th>Date</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var activity in Model)
+                                                    {
+                                                        <tr>
+                                                            <td>@activity.Subject</td>
+                                                            <td>@activity.ActivityType</td>
+                                                            <td>
+                                                                @activity.ActivityDate.ToString("dd MMM")
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge bg-secondary">
+                                                                    @activity.Status
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted">
+                                            No activities recorded yet. Create an activity to see it here.
+                                        </p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm mt-4">
+                        <div class="card-body">
+                            <h5>Quick Actions</h5>
+                            <div class="d-flex flex-wrap gap-2 mt-3">
+                                <a asp-controller="Customers" asp-action="Create" class="btn btn-primary">+ Customer</a>
+                                <a asp-controller="Leads" asp-action="Create" class="btn btn-outline-primary">+ Lead</a>
+                                <a asp-controller="Opportunities" asp-action="Create" class="btn btn-outline-primary">+ Opportunity</a>
+                                <a asp-controller="FollowUps" asp-action="Create" class="btn btn-outline-primary">+ Follow-Up</a>
+                                <a asp-controller="Activities" asp-action="Create" class="btn btn-outline-primary">+ Activity</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>

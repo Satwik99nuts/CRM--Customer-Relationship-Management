@@ -1,0 +1,81 @@
+@model IEnumerable<AcxiomCRM.Models.Opportunity>
+
+@{
+    ViewData["Title"] = "Opportunities";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Sales Opportunities</h1>
+            <p class="text-muted">Manage deals and track your sales pipeline.</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary">+ Add Opportunity</a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    <form asp-action="Index" method="get" class="input-group mb-4">
+        <input type="text" name="search" value="@ViewData["Search"]" class="form-control"
+               placeholder="Search opportunities, stages or status..." />
+        <button type="submit" class="btn btn-dark">Search</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Opportunity</th>
+                    <th>Customer ID</th>
+                    <th>Amount</th>
+                    <th>Stage</th>
+                    <th>Probability</th>
+                    <th>Expected Close</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.OpportunityName</td>
+                            <td>@item.CustomerId</td>
+                            <td>@item.Amount.ToString("N2")</td>
+                            <td>@item.Stage</td>
+                            <td>@item.Probability%</td>
+                            <td>@item.ExpectedCloseDate.ToString("dd MMM yyyy")</td>
+                            <td>
+                                <span class="badge bg-secondary">@item.Status</span>
+                            </td>
+                            <td class="text-nowrap">
+                                <a asp-action="Details" asp-route-id="@item.OpportunityId"
+                                   class="btn btn-sm btn-outline-info">View</a>
+                                <a asp-action="Edit" asp-route-id="@item.OpportunityId"
+                                   class="btn btn-sm btn-outline-primary">Edit</a>
+                                <a asp-action="Delete" asp-route-id="@item.OpportunityId"
+                                   class="btn btn-sm btn-outline-danger">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            No opportunities found. Add your first deal.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

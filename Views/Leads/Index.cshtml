@@ -1,0 +1,81 @@
+
+@model IEnumerable<AcxiomCRM.Models.Lead>
+
+@{
+    ViewData["Title"] = "Leads";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>Leads</h1>
+        <p class="text-muted">Track prospective customers and sales opportunities.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">+ Add Lead</a>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-7">
+        <input name="search" value="@ViewBag.Search"
+               class="form-control" placeholder="Search name, email or company..." />
+    </div>
+    <div class="col-md-3">
+        <select name="status" class="form-select">
+            <option value="">All statuses</option>
+            <option value="New">New</option>
+            <option value="Contacted">Contacted</option>
+            <option value="Qualified">Qualified</option>
+            <option value="Converted">Converted</option>
+            <option value="Lost">Lost</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-dark w-100">Filter</button>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Lead</th>
+                <th>Company</th>
+                <th>Email</th>
+                <th>Source</th>
+                <th>Expected Value</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var lead in Model)
+        {
+            <tr>
+                <td>@lead.LeadName</td>
+                <td>@lead.CompanyName</td>
+                <td>@lead.Email</td>
+                <td>@lead.Source</td>
+                <td>@lead.ExpectedValue.ToString("C")</td>
+                <td><span class="badge bg-primary">@lead.Status</span></td>
+                <td class="text-nowrap">
+                    <a asp-action="Details" asp-route-id="@lead.LeadId"
+                       class="btn btn-sm btn-outline-info">View</a>
+                    <a asp-action="Edit" asp-route-id="@lead.LeadId"
+                       class="btn btn-sm btn-outline-primary">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@lead.LeadId"
+                       class="btn btn-sm btn-outline-danger">Delete</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-light border">No leads found. Add your first lead.</div>
+}

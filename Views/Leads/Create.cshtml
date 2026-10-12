@@ -1,0 +1,19 @@
+
+@model AcxiomCRM.Models.Lead
+
+@{
+    ViewData["Title"] = "Add Lead";
+}
+
+<h1>Add Lead</h1>
+<p class="text-muted">Enter the prospective customer's information.</p>
+
+<form asp-action="Create" method="post">
+    <partial name="_LeadForm" model="Model" />
+    <button type="submit" class="btn btn-primary">Save Lead</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
