@@ -28,6 +28,11 @@ namespace AcxiomCRM.Migrations
 
                     b.Property<string>("ActivityType")
                         .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AssignedTo")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("CustomerId")
@@ -35,6 +40,7 @@ namespace AcxiomCRM.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
+                        .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("LeadId")
@@ -42,6 +48,7 @@ namespace AcxiomCRM.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
+                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Subject")
@@ -56,6 +63,77 @@ namespace AcxiomCRM.Migrations
                     b.HasIndex("LeadId");
 
                     b.ToTable("Activities");
+                });
+
+            modelBuilder.Entity("AcxiomCRM.Models.ApplicationUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex");
+
+                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("AcxiomCRM.Models.AuditLog", b =>
@@ -81,8 +159,28 @@ namespace AcxiomCRM.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("IpAddress")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NewValue")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OldValue")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
                     b.Property<int?>("RecordId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Result")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -114,7 +212,16 @@ namespace AcxiomCRM.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CustomerCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("CustomerName")
@@ -127,9 +234,21 @@ namespace AcxiomCRM.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Phone")
                         .IsRequired()
                         .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasMaxLength(80)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Status")
@@ -137,6 +256,15 @@ namespace AcxiomCRM.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("CustomerId");
+
+                    b.HasIndex("CustomerCode")
+                        .IsUnique();
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Phone")
+                        .IsUnique();
 
                     b.ToTable("Customers");
                 });
@@ -147,6 +275,10 @@ namespace AcxiomCRM.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("AssignedTo")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<int?>("CustomerId")
                         .HasColumnType("INTEGER");
 
@@ -156,12 +288,17 @@ namespace AcxiomCRM.Migrations
                     b.Property<int?>("LeadId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("OpportunityId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Remarks")
                         .IsRequired()
+                        .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Status")
                         .IsRequired()
+                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Subject")
@@ -171,6 +308,7 @@ namespace AcxiomCRM.Migrations
 
                     b.Property<string>("Type")
                         .IsRequired()
+                        .HasMaxLength(30)
                         .HasColumnType("TEXT");
 
                     b.HasKey("FollowUpId");
@@ -178,6 +316,8 @@ namespace AcxiomCRM.Migrations
                     b.HasIndex("CustomerId");
 
                     b.HasIndex("LeadId");
+
+                    b.HasIndex("OpportunityId");
 
                     b.ToTable("FollowUps");
                 });
@@ -190,6 +330,13 @@ namespace AcxiomCRM.Migrations
 
                     b.Property<string>("CompanyName")
                         .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("ConvertedCustomerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("ConvertedDate")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedDate")
@@ -203,9 +350,18 @@ namespace AcxiomCRM.Migrations
                     b.Property<decimal>("ExpectedValue")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("LeadCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("LeadName")
                         .IsRequired()
                         .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Phone")
@@ -215,6 +371,7 @@ namespace AcxiomCRM.Migrations
 
                     b.Property<string>("Source")
                         .IsRequired()
+                        .HasMaxLength(40)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Status")
@@ -222,6 +379,11 @@ namespace AcxiomCRM.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("LeadId");
+
+                    b.HasIndex("ConvertedCustomerId");
+
+                    b.HasIndex("LeadCode")
+                        .IsUnique();
 
                     b.ToTable("Leads");
                 });
@@ -235,15 +397,25 @@ namespace AcxiomCRM.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("TEXT");
+
                     b.Property<int?>("CustomerId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("ExpectedCloseDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("LeadId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("OpportunityName")
                         .IsRequired()
                         .HasMaxLength(150)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Probability")
@@ -251,15 +423,19 @@ namespace AcxiomCRM.Migrations
 
                     b.Property<string>("Stage")
                         .IsRequired()
+                        .HasMaxLength(30)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Status")
                         .IsRequired()
+                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.HasKey("OpportunityId");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("LeadId");
 
                     b.ToTable("Opportunities");
                 });
@@ -313,70 +489,6 @@ namespace AcxiomCRM.Migrations
                     b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex");
-
-                    b.ToTable("AspNetUsers", (string)null);
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
                     b.Property<int>("Id")
@@ -403,11 +515,9 @@ namespace AcxiomCRM.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ProviderKey")
-                        .HasMaxLength(128)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ProviderDisplayName")
@@ -445,11 +555,9 @@ namespace AcxiomCRM.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(128)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Value")
@@ -463,11 +571,11 @@ namespace AcxiomCRM.Migrations
             modelBuilder.Entity("AcxiomCRM.Models.Activity", b =>
                 {
                     b.HasOne("AcxiomCRM.Models.Customer", "Customer")
-                        .WithMany()
+                        .WithMany("Activities")
                         .HasForeignKey("CustomerId");
 
                     b.HasOne("AcxiomCRM.Models.Lead", "Lead")
-                        .WithMany()
+                        .WithMany("Activities")
                         .HasForeignKey("LeadId");
 
                     b.Navigation("Customer");
@@ -478,25 +586,49 @@ namespace AcxiomCRM.Migrations
             modelBuilder.Entity("AcxiomCRM.Models.FollowUp", b =>
                 {
                     b.HasOne("AcxiomCRM.Models.Customer", "Customer")
-                        .WithMany()
+                        .WithMany("FollowUps")
                         .HasForeignKey("CustomerId");
 
                     b.HasOne("AcxiomCRM.Models.Lead", "Lead")
-                        .WithMany()
+                        .WithMany("FollowUps")
                         .HasForeignKey("LeadId");
+
+                    b.HasOne("AcxiomCRM.Models.Opportunity", "Opportunity")
+                        .WithMany("FollowUps")
+                        .HasForeignKey("OpportunityId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Customer");
 
                     b.Navigation("Lead");
+
+                    b.Navigation("Opportunity");
+                });
+
+            modelBuilder.Entity("AcxiomCRM.Models.Lead", b =>
+                {
+                    b.HasOne("AcxiomCRM.Models.Customer", "ConvertedCustomer")
+                        .WithMany()
+                        .HasForeignKey("ConvertedCustomerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("ConvertedCustomer");
                 });
 
             modelBuilder.Entity("AcxiomCRM.Models.Opportunity", b =>
                 {
                     b.HasOne("AcxiomCRM.Models.Customer", "Customer")
-                        .WithMany()
+                        .WithMany("Opportunities")
                         .HasForeignKey("CustomerId");
 
+                    b.HasOne("AcxiomCRM.Models.Lead", "Lead")
+                        .WithMany("Opportunities")
+                        .HasForeignKey("LeadId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Customer");
+
+                    b.Navigation("Lead");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -510,7 +642,7 @@ namespace AcxiomCRM.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("AcxiomCRM.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -519,7 +651,7 @@ namespace AcxiomCRM.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("AcxiomCRM.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -534,7 +666,7 @@ namespace AcxiomCRM.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("AcxiomCRM.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -543,11 +675,34 @@ namespace AcxiomCRM.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("AcxiomCRM.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("AcxiomCRM.Models.Customer", b =>
+                {
+                    b.Navigation("Activities");
+
+                    b.Navigation("FollowUps");
+
+                    b.Navigation("Opportunities");
+                });
+
+            modelBuilder.Entity("AcxiomCRM.Models.Lead", b =>
+                {
+                    b.Navigation("Activities");
+
+                    b.Navigation("FollowUps");
+
+                    b.Navigation("Opportunities");
+                });
+
+            modelBuilder.Entity("AcxiomCRM.Models.Opportunity", b =>
+                {
+                    b.Navigation("FollowUps");
                 });
 #pragma warning restore 612, 618
         }

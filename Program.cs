@@ -3,18 +3,37 @@ using AcxiomCRM.Data;
 using AcxiomCRM.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using AcxiomCRM.Models;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
+using Microsoft.Data.Sqlite;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-        ?? "Data Source=acxiomcrm.db"));
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy("auth", context => RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 10,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0,
+            AutoReplenishment = true
+        }));
+});
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? "Data Source=acxiomcrm.db";
+var sqliteConnection = new SqliteConnectionStringBuilder(connectionString);
+if (!Path.IsPathRooted(sqliteConnection.DataSource))
+    sqliteConnection.DataSource = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, sqliteConnection.DataSource));
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(sqliteConnection.ToString()));
 
 builder.Services
-    .AddDefaultIdentity<IdentityUser>(options =>
+    .AddDefaultIdentity<ApplicationUser>(options =>
     {
         options.SignIn.RequireConfirmedAccount = false;
 
@@ -31,9 +50,40 @@ builder.Services
     })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddScoped<SignInManager<ApplicationUser>, ActiveUserSignInManager>();
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+    options.ValidationInterval = TimeSpan.Zero);
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Auth/Login";
+    options.AccessDeniedPath = "/Auth/AccessDenied";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+        ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
+    options.SlidingExpiration = true;
+    options.Events.OnRedirectToLogin = context =>
+    {
+        if (context.Request.Path.StartsWithSegments("/api"))
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        else
+            context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        if (context.Request.Path.StartsWithSegments("/api"))
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+        else
+            context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
+});
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuditService>();
+builder.Services.AddScoped<CrmAccessService>();
 
 var app = builder.Build();
 
@@ -46,6 +96,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -61,6 +112,13 @@ using (var scope = app.Services.CreateScope())
         .GetRequiredService<ApplicationDbContext>();
 
     await db.Database.MigrateAsync();
+
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    foreach (var roleName in new[] { "Admin", "Manager", "Sales Executive" })
+    {
+        if (!await roleManager.RoleExistsAsync(roleName))
+            await roleManager.CreateAsync(new IdentityRole(roleName));
+    }
 }
 
 if (args.Any(a => a.Equals(
@@ -73,7 +131,7 @@ if (args.Any(a => a.Equals(
         .GetRequiredService<RoleManager<IdentityRole>>();
 
     var userManager = scope.ServiceProvider
-        .GetRequiredService<UserManager<IdentityUser>>();
+        .GetRequiredService<UserManager<ApplicationUser>>();
 
     if (!await roleManager.RoleExistsAsync("Admin"))
     {
@@ -118,11 +176,12 @@ if (args.Any(a => a.Equals(
         Console.Write("New password: ");
         var password = ReadPassword();
 
-        user = new IdentityUser
+        user = new ApplicationUser
         {
             UserName = email,
             Email = email,
-            EmailConfirmed = true
+            EmailConfirmed = true,
+            DisplayName = email
         };
 
         var createResult = await userManager.CreateAsync(
@@ -139,8 +198,20 @@ if (args.Any(a => a.Equals(
         }
     }
 
-    if (!await userManager.IsInRoleAsync(user, "Admin"))
+    var currentRoles = await userManager.GetRolesAsync(user);
+    if (currentRoles.Count != 1 || currentRoles[0] != "Admin")
     {
+        if (currentRoles.Count > 0)
+        {
+            var removeResult = await userManager.RemoveFromRolesAsync(user, currentRoles);
+            if (!removeResult.Succeeded)
+            {
+                Console.WriteLine("Could not replace the user's current roles:");
+                foreach (var error in removeResult.Errors)
+                    Console.WriteLine(error.Description);
+                return;
+            }
+        }
         var addResult = await userManager.AddToRoleAsync(
             user,
             "Admin");
@@ -153,6 +224,9 @@ if (args.Any(a => a.Equals(
 
             return;
         }
+        var auditService = scope.ServiceProvider.GetRequiredService<AuditService>();
+        await auditService.LogAsync("RoleChange", "User", details: $"Administrator role provisioned for user {user.Id}.", oldValue: string.Join(",", currentRoles), newValue: "Admin");
+        await userManager.UpdateSecurityStampAsync(user);
     }
 
     Console.WriteLine($"Admin role assigned to {user.Email}.");

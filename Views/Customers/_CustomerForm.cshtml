@@ -37,6 +37,11 @@
         <input asp-for="City" class="form-control" />
         <span asp-validation-for="City" class="text-danger"></span>
     </div>
+    <div class="col-md-4 mb-3">
+        <label asp-for="State" class="form-label"></label>
+        <input asp-for="State" class="form-control" />
+        <span asp-validation-for="State" class="text-danger"></span>
+    </div>
 
     <div class="col-md-6 mb-3">
         <label asp-for="Status" class="form-label"></label>
@@ -45,4 +50,12 @@
             <option value="Inactive">Inactive</option>
         </select>
     </div>
+    @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+    {
+        <div class="col-md-6 mb-3">
+            <label asp-for="OwnerId" class="form-label">Assigned Sales Executive</label>
+            <select asp-for="OwnerId" asp-items="ViewBag.Owners" class="form-select"><option value="">-- Select owner --</option></select>
+            <span asp-validation-for="OwnerId" class="text-danger"></span>
+        </div>
+    }
 </div>

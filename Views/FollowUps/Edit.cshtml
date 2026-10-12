@@ -17,6 +17,7 @@
             <input asp-for="Subject" class="form-control" required />
             <span asp-validation-for="Subject" class="text-danger"></span>
         </div>
+        @if (User.IsInRole("Admin") || User.IsInRole("Manager")) { <div class="mb-3"><label asp-for="AssignedTo" class="form-label">Assigned Sales Executive</label><select asp-for="AssignedTo" asp-items="ViewBag.Owners" class="form-select"><option value="">-- Select owner --</option></select><span asp-validation-for="AssignedTo" class="text-danger"></span></div> }
 
         <div class="mb-3">
             <label asp-for="FollowUpDate" class="form-label">Date and Time</label>
@@ -48,11 +49,14 @@
             </select>
         </div>
 
+        <div class="mb-3"><label asp-for="OpportunityId" class="form-label">Opportunity</label><select asp-for="OpportunityId" asp-items="ViewBag.Opportunities" class="form-select"><option value="">-- Select Opportunity --</option></select><span asp-validation-for="OpportunityId" class="text-danger"></span></div>
+
         <div class="mb-3">
             <label asp-for="Status" class="form-label">Status</label>
             <select asp-for="Status" class="form-select">
                 <option value="Planned">Planned</option>
                 <option value="Completed">Completed</option>
+                <option value="Missed">Missed</option>
                 <option value="Cancelled">Cancelled</option>
             </select>
         </div>

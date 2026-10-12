@@ -17,8 +17,10 @@
                 <dt class="col-sm-4">Opportunity ID</dt>
                 <dd class="col-sm-8">@Model.OpportunityId</dd>
 
-                <dt class="col-sm-4">Customer ID</dt>
-                <dd class="col-sm-8">@Model.CustomerId</dd>
+                <dt class="col-sm-4">Customer</dt>
+                <dd class="col-sm-8">@Model.Customer?.CustomerName</dd>
+                <dt class="col-sm-4">Related lead</dt>
+                <dd class="col-sm-8">@Model.Lead?.LeadName</dd>
 
                 <dt class="col-sm-4">Amount</dt>
                 <dd class="col-sm-8">@Model.Amount.ToString("N2")</dd>
@@ -38,6 +40,8 @@
 
             <a asp-action="Edit" asp-route-id="@Model.OpportunityId" class="btn btn-primary">Edit</a>
             <a asp-action="Index" class="btn btn-secondary">Back to Opportunities</a>
+            <h2 class="h5 mt-4">Follow-up history</h2>
+            <ul class="list-group">@foreach (var item in Model.FollowUps.OrderByDescending(x => x.FollowUpDate)) { <li class="list-group-item"><a asp-controller="FollowUps" asp-action="Details" asp-route-id="@item.FollowUpId">@item.Subject</a> · @item.FollowUpDate.ToString("yyyy-MM-dd") · @item.Status</li> } @if (!Model.FollowUps.Any()) { <li class="list-group-item text-muted">No follow-ups.</li> }</ul>
         </div>
     </div>
 </div>

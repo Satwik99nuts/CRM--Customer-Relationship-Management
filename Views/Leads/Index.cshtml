@@ -26,11 +26,12 @@
     <div class="col-md-3">
         <select name="status" class="form-select">
             <option value="">All statuses</option>
-            <option value="New">New</option>
-            <option value="Contacted">Contacted</option>
-            <option value="Qualified">Qualified</option>
-            <option value="Converted">Converted</option>
-            <option value="Lost">Lost</option>
+            <option value="New" selected="@(ViewBag.Status == "New")">New</option>
+            <option value="Contacted" selected="@(ViewBag.Status == "Contacted")">Contacted</option>
+            <option value="Qualified" selected="@(ViewBag.Status == "Qualified")">Qualified</option>
+            <option value="Unqualified" selected="@(ViewBag.Status == "Unqualified")">Unqualified</option>
+            <option value="Converted" selected="@(ViewBag.Status == "Converted")">Converted</option>
+            <option value="Lost" selected="@(ViewBag.Status == "Lost")">Lost</option>
         </select>
     </div>
     <div class="col-md-2">
@@ -66,8 +67,6 @@
                        class="btn btn-sm btn-outline-info">View</a>
                     <a asp-action="Edit" asp-route-id="@lead.LeadId"
                        class="btn btn-sm btn-outline-primary">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@lead.LeadId"
-                       class="btn btn-sm btn-outline-danger">Delete</a>
                 </td>
             </tr>
         }
@@ -79,3 +78,4 @@
 {
     <div class="alert alert-light border">No leads found. Add your first lead.</div>
 }
+<nav aria-label="Lead pages"><ul class="pagination">@for (var i = 1; i <= (int)ViewBag.PageCount; i++) { <li class="page-item @(i == (int)ViewBag.Page ? "active" : "")"><a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-search="@ViewBag.Search" asp-route-status="@ViewBag.Status">@i</a></li> }</ul></nav>

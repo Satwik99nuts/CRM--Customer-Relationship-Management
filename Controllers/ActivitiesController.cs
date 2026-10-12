@@ -1,241 +1,124 @@
-
 using AcxiomCRM.Data;
 using AcxiomCRM.Models;
 using AcxiomCRM.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace AcxiomCRM.Controllers;
 
+[Authorize(Roles = "Admin,Manager,Sales Executive")]
 public class ActivitiesController : Controller
 {
     private readonly ApplicationDbContext _context;
-    private readonly AuditService _auditService;
+    private readonly AuditService _audit;
+    private readonly CrmAccessService _access;
+    public ActivitiesController(ApplicationDbContext context, AuditService audit, CrmAccessService access)
+    { _context = context; _audit = audit; _access = access; }
 
-    public ActivitiesController(
-        ApplicationDbContext context,
-        AuditService auditService)
+    public async Task<IActionResult> Index(string? search, string? type, string? status, string? assignedTo, DateTime? fromDate, DateTime? toDate, int page = 1)
     {
-        _context = context;
-        _auditService = auditService;
-    }
-
-    private async Task LoadDropdowns()
-    {
-        ViewBag.Customers = new SelectList(
-            await _context.Customers
-                .AsNoTracking()
-                .OrderBy(c => c.CustomerName)
-                .ToListAsync(),
-            "CustomerId",
-            "CustomerName");
-
-        ViewBag.Leads = new SelectList(
-            await _context.Leads
-                .AsNoTracking()
-                .OrderBy(l => l.LeadName)
-                .ToListAsync(),
-            "LeadId",
-            "LeadName");
-    }
-
-    public async Task<IActionResult> Index(string? search)
-    {
-        var query = _context.Activities
-            .AsNoTracking()
-            .Include(a => a.Customer)
-            .Include(a => a.Lead)
-            .AsQueryable();
-
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            query = query.Where(a =>
-                a.Subject.Contains(search) ||
-                a.ActivityType.Contains(search) ||
-                a.Status.Contains(search) ||
-                (a.Description != null &&
-                 a.Description.Contains(search)));
-        }
-
-        ViewData["Search"] = search;
-
-        return View(await query
-            .OrderByDescending(a => a.ActivityDate)
-            .ToListAsync());
+        var query = _access.Activities(_context.Activities.AsNoTracking().Include(x => x.Customer).Include(x => x.Lead), User);
+        if (!string.IsNullOrWhiteSpace(search)) query = query.Where(x => x.Subject.Contains(search) || x.Description.Contains(search) || (x.Customer != null && x.Customer.CustomerName.Contains(search)) || (x.Lead != null && x.Lead.LeadName.Contains(search)));
+        if (!string.IsNullOrWhiteSpace(type)) query = query.Where(x => x.ActivityType == type);
+        if (!string.IsNullOrWhiteSpace(status)) query = query.Where(x => x.Status == status);
+        if (!string.IsNullOrWhiteSpace(assignedTo)) query = query.Where(x => x.AssignedTo == assignedTo);
+        if (fromDate.HasValue) query = query.Where(x => x.ActivityDate >= fromDate.Value.Date);
+        if (toDate.HasValue) query = query.Where(x => x.ActivityDate < toDate.Value.Date.AddDays(1));
+        const int pageSize = 20; var total = await query.CountAsync();
+        page = Math.Clamp(page, 1, Math.Max(1, (int)Math.Ceiling(total / (double)pageSize)));
+        ViewBag.Search = search; ViewBag.Type = type; ViewBag.Status = status; ViewBag.AssignedTo = assignedTo; ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd"); ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd"); ViewBag.Page = page; ViewBag.PageCount = Math.Max(1, (int)Math.Ceiling(total / (double)pageSize));
+        if (_access.CanSeeAll(User)) ViewBag.OwnerOptions = new SelectList(await _access.SalesUsersAsync(), "Id", "DisplayName", assignedTo);
+        return View(await query.OrderByDescending(x => x.ActivityDate).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync());
     }
 
     public async Task<IActionResult> Details(int? id)
     {
-        if (id == null)
-            return NotFound();
-
-        var activity = await _context.Activities
-            .AsNoTracking()
-            .Include(a => a.Customer)
-            .Include(a => a.Lead)
-            .FirstOrDefaultAsync(a => a.ActivityId == id);
-
-        if (activity == null)
-            return NotFound();
-
-        return View(activity);
+        if (id == null) return NotFound();
+        var item = await _access.Activities(_context.Activities.AsNoTracking().Include(x => x.Customer).Include(x => x.Lead), User).FirstOrDefaultAsync(x => x.ActivityId == id);
+        return item == null ? NotFound() : View(item);
     }
 
-    public async Task<IActionResult> Create()
+    public async Task<IActionResult> Create() { await LoadDropdowns(); return View(new Activity()); }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(Activity item)
     {
-        await LoadDropdowns();
-        return View(new Activity());
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Activity activity)
-    {
-        ValidateAssociation(activity);
-
-        if (!ModelState.IsValid)
-        {
-            await LoadDropdowns();
-            return View(activity);
-        }
-
-        _context.Activities.Add(activity);
-        await _context.SaveChangesAsync();
-
-        await _auditService.LogAsync(
-            "Create",
-            "Activity",
-            activity.ActivityId,
-            $"Created activity: {activity.Subject}");
-
-        TempData["Success"] = "Activity created successfully.";
-
-        return RedirectToAction(nameof(Index));
+        await ValidateAssociation(item); ValidateRules(item);
+        if (_access.CanSeeAll(User) && !await _access.IsValidOwnerAsync(item.AssignedTo)) ModelState.AddModelError(nameof(item.AssignedTo), "Assign this activity to an active Sales Executive.");
+        else if (!_access.CanSeeAll(User)) item.AssignedTo = _access.UserId(User);
+        if (!ModelState.IsValid) { await LoadDropdowns(item.CustomerId, item.LeadId, item.AssignedTo); return View(item); }
+        _context.Activities.Add(item); await _context.SaveChangesAsync();
+        await _audit.LogAsync("Create", "Activity", item.ActivityId, $"Created activity: {item.Subject}");
+        TempData["Success"] = "Activity created successfully."; return RedirectToAction(nameof(Index));
     }
 
     public async Task<IActionResult> Edit(int? id)
     {
-        if (id == null)
-            return NotFound();
-
-        var activity = await _context.Activities.FindAsync(id);
-
-        if (activity == null)
-            return NotFound();
-
-        await LoadDropdowns();
-        return View(activity);
+        if (id == null) return NotFound();
+        var item = await _access.Activities(_context.Activities, User).FirstOrDefaultAsync(x => x.ActivityId == id);
+        if (item == null) return NotFound();
+        await LoadDropdowns(item.CustomerId, item.LeadId, item.AssignedTo); return View(item);
     }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Activity activity)
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, Activity item)
     {
-        if (id != activity.ActivityId)
-            return NotFound();
-
-        ValidateAssociation(activity);
-
+        if (id != item.ActivityId) return NotFound();
+        var existing = await _access.Activities(_context.Activities, User).FirstOrDefaultAsync(x => x.ActivityId == id);
+        if (existing == null) return NotFound();
+        if (!_access.CanSeeAll(User) && existing.AssignedTo != _access.UserId(User)) return Forbid();
+        await ValidateAssociation(item); ValidateRules(item);
+        if (_access.CanSeeAll(User) && !await _access.IsValidOwnerAsync(item.AssignedTo)) ModelState.AddModelError(nameof(item.AssignedTo), "Assign this activity to an active Sales Executive.");
         if (!ModelState.IsValid)
         {
-            await LoadDropdowns();
-            return View(activity);
+            item.AssignedTo = _access.CanSeeAll(User) ? item.AssignedTo : existing.AssignedTo;
+            await LoadDropdowns(item.CustomerId, item.LeadId, item.AssignedTo); return View(item);
         }
-
-        var existing = await _context.Activities.FindAsync(id);
-
-        if (existing == null)
-            return NotFound();
-
-        existing.Subject = activity.Subject;
-        existing.ActivityType = activity.ActivityType;
-        existing.Description = activity.Description;
-        existing.ActivityDate = activity.ActivityDate;
-        existing.Status = activity.Status;
-        existing.CustomerId = activity.CustomerId;
-        existing.LeadId = activity.LeadId;
-
+        var oldStatus = existing.Status; existing.Subject = item.Subject; existing.ActivityType = item.ActivityType;
+        existing.Description = item.Description; existing.ActivityDate = item.ActivityDate; existing.Status = item.Status;
+        existing.CustomerId = item.CustomerId; existing.LeadId = item.LeadId;
+        if (_access.CanSeeAll(User)) existing.AssignedTo = item.AssignedTo;
         await _context.SaveChangesAsync();
-
-        await _auditService.LogAsync(
-            "Update",
-            "Activity",
-            existing.ActivityId,
-            $"Updated activity: {existing.Subject}");
-
-        TempData["Success"] = "Activity updated successfully.";
-
-        return RedirectToAction(nameof(Index));
+        await _audit.LogAsync("Update", "Activity", id, "Updated activity.", oldValue: oldStatus, newValue: existing.Status);
+        TempData["Success"] = "Activity updated successfully."; return RedirectToAction(nameof(Index));
     }
 
     public async Task<IActionResult> Delete(int? id)
     {
-        if (id == null)
-            return NotFound();
-
-        var activity = await _context.Activities
-            .AsNoTracking()
-            .Include(a => a.Customer)
-            .Include(a => a.Lead)
-            .FirstOrDefaultAsync(a => a.ActivityId == id);
-
-        if (activity == null)
-            return NotFound();
-
-        return View(activity);
+        if (id == null) return NotFound();
+        var item = await _access.Activities(_context.Activities.AsNoTracking().Include(x => x.Customer).Include(x => x.Lead), User).FirstOrDefaultAsync(x => x.ActivityId == id);
+        return item == null ? NotFound() : View(item);
     }
 
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
+    [HttpPost, ActionName("Delete"), ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var activity = await _context.Activities.FindAsync(id);
-
-        if (activity == null)
-            return NotFound();
-
-        var subject = activity.Subject;
-
-        _context.Activities.Remove(activity);
-        await _context.SaveChangesAsync();
-
-        await _auditService.LogAsync(
-            "Delete",
-            "Activity",
-            id,
-            $"Deleted activity: {subject}");
-
-        TempData["Success"] = "Activity deleted successfully.";
-
-        return RedirectToAction(nameof(Index));
+        var item = await _access.Activities(_context.Activities, User).FirstOrDefaultAsync(x => x.ActivityId == id);
+        if (item == null) return NotFound();
+        _context.Activities.Remove(item); await _context.SaveChangesAsync();
+        await _audit.LogAsync("Delete", "Activity", id, $"Deleted activity: {item.Subject}");
+        TempData["Success"] = "Activity deleted successfully."; return RedirectToAction(nameof(Index));
     }
 
-    private void ValidateAssociation(Activity activity)
+    private async Task ValidateAssociation(Activity item)
     {
-        if (activity.CustomerId == null && activity.LeadId == null)
-        {
-            ModelState.AddModelError(
-                string.Empty,
-                "Associate this activity with a customer or a lead.");
-        }
+        if (item.CustomerId.HasValue == item.LeadId.HasValue) ModelState.AddModelError("", "Select exactly one customer or one lead.");
+        if (item.CustomerId.HasValue && !await _access.Customers(_context.Customers, User).AnyAsync(x => x.CustomerId == item.CustomerId)) ModelState.AddModelError(nameof(item.CustomerId), "Select an accessible customer.");
+        if (item.LeadId.HasValue && !await _access.Leads(_context.Leads, User).AnyAsync(x => x.LeadId == item.LeadId)) ModelState.AddModelError(nameof(item.LeadId), "Select an accessible lead.");
+    }
 
-        if (activity.CustomerId.HasValue &&
-            !_context.Customers.Any(c =>
-                c.CustomerId == activity.CustomerId.Value))
-        {
-            ModelState.AddModelError(
-                nameof(activity.CustomerId),
-                "Select a valid customer.");
-        }
+    private void ValidateRules(Activity item)
+    {
+        if (!new[] { "Call", "Meeting", "Email", "Task" }.Contains(item.ActivityType, StringComparer.OrdinalIgnoreCase)) ModelState.AddModelError(nameof(item.ActivityType), "Select Call, Meeting, Email, or Task.");
+        if (!new[] { "Planned", "In Progress", "Completed", "Cancelled" }.Contains(item.Status, StringComparer.OrdinalIgnoreCase)) ModelState.AddModelError(nameof(item.Status), "Select a valid activity status.");
+    }
 
-        if (activity.LeadId.HasValue &&
-            !_context.Leads.Any(l =>
-                l.LeadId == activity.LeadId.Value))
-        {
-            ModelState.AddModelError(
-                nameof(activity.LeadId),
-                "Select a valid lead.");
-        }
+    private async Task LoadDropdowns(int? customerId = null, int? leadId = null, string? assignedTo = null)
+    {
+        ViewBag.Customers = new SelectList(await _access.Customers(_context.Customers.AsNoTracking(), User).OrderBy(x => x.CustomerName).ToListAsync(), "CustomerId", "CustomerName", customerId);
+        ViewBag.Leads = new SelectList(await _access.Leads(_context.Leads.AsNoTracking(), User).OrderBy(x => x.LeadName).ToListAsync(), "LeadId", "LeadName", leadId);
+        ViewBag.Owners = new SelectList(await _access.SalesUsersAsync(), "Id", "DisplayName", assignedTo);
     }
 }

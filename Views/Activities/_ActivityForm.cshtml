@@ -15,9 +15,9 @@
         <option value="Meeting">Meeting</option>
         <option value="Email">Email</option>
         <option value="Task">Task</option>
-        <option value="Other">Other</option>
     </select>
 </div>
+@if (User.IsInRole("Admin") || User.IsInRole("Manager")) { <div class="mb-3"><label asp-for="AssignedTo" class="form-label">Assigned Sales Executive</label><select asp-for="AssignedTo" asp-items="ViewBag.Owners" class="form-select"><option value="">-- Select owner --</option></select><span asp-validation-for="AssignedTo" class="text-danger"></span></div> }
 
 <div class="mb-3">
     <label asp-for="ActivityDate" class="form-label">Date and Time</label>

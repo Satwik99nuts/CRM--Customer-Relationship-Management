@@ -23,11 +23,14 @@ public class AuditService
         string entityName,
         int? recordId = null,
         string details = "",
-        string result = "Success")
+        string result = "Success",
+        string oldValue = "",
+        string newValue = "",
+        string? userIdOverride = null)
     {
         var user = _httpContextAccessor.HttpContext?.User;
 
-        var userId = user?.FindFirstValue(ClaimTypes.NameIdentifier)
+        var userId = userIdOverride ?? user?.FindFirstValue(ClaimTypes.NameIdentifier)
                      ?? "System";
 
         var log = new AuditLog
@@ -36,9 +39,11 @@ public class AuditService
             EntityName = entityName,
             RecordId = recordId,
             UserId = userId,
-            Details = string.IsNullOrWhiteSpace(result)
-                ? details
-                : $"{details} | Result: {result}",
+            Details = details,
+            Result = result,
+            OldValue = oldValue,
+            NewValue = newValue,
+            IpAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "",
             CreatedDate = DateTime.UtcNow
         };
 

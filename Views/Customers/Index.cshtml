@@ -18,14 +18,10 @@
     <div class="alert alert-success">@TempData["Success"]</div>
 }
 
-<form method="get" class="mb-3">
-    <div class="input-group">
-        <input name="search" value="@ViewBag.Search"
-               class="form-control"
-               placeholder="Search name, email, phone or company..." />
-        <button class="btn btn-dark" type="submit">Search</button>
-        <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
-    </div>
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-7"><input name="search" value="@ViewBag.Search" class="form-control" placeholder="Search name, email, phone or company..." /></div>
+    <div class="col-md-3"><select name="status" class="form-select"><option value="">All statuses</option><option value="Active" selected="@(ViewBag.Status == "Active")">Active</option><option value="Inactive" selected="@(ViewBag.Status == "Inactive")">Inactive</option></select></div>
+    <div class="col-md-2"><button class="btn btn-dark w-100" type="submit">Filter</button></div>
 </form>
 
 <div class="table-responsive">
@@ -67,3 +63,4 @@
 {
     <div class="alert alert-light border">No customers found. Add your first customer!</div>
 }
+<nav aria-label="Customer pages"><ul class="pagination">@for (var i = 1; i <= (int)ViewBag.PageCount; i++) { <li class="page-item @(i == (int)ViewBag.Page ? "active" : "")"><a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-search="@ViewBag.Search" asp-route-status="@ViewBag.Status">@i</a></li> }</ul></nav>

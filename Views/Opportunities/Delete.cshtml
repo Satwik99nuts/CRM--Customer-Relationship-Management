@@ -8,13 +8,13 @@
     <h1>Delete Opportunity</h1>
 
     <div class="alert alert-warning">
-        Are you sure you want to permanently delete this opportunity?
+        If follow-ups reference this opportunity, deletion will be blocked so that history is preserved.
     </div>
 
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <h5>@Model.OpportunityName</h5>
-            <p><strong>Customer ID:</strong> @Model.CustomerId</p>
+            <p><strong>Customer:</strong> @Model.Customer?.CustomerName</p>
             <p><strong>Amount:</strong> @Model.Amount.ToString("N2")</p>
             <p><strong>Stage:</strong> @Model.Stage</p>
             <p><strong>Status:</strong> @Model.Status</p>

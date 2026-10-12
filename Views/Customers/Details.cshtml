@@ -26,6 +26,9 @@
     <dt class="col-sm-3">City</dt>
     <dd class="col-sm-9">@Model.City</dd>
 
+    <dt class="col-sm-3">State</dt>
+    <dd class="col-sm-9">@Model.State</dd>
+
     <dt class="col-sm-3">Status</dt>
     <dd class="col-sm-9">@Model.Status</dd>
 
@@ -36,3 +39,10 @@
 <a asp-action="Edit" asp-route-id="@Model.CustomerId"
    class="btn btn-primary">Edit</a>
 <a asp-action="Index" class="btn btn-secondary">Back to Customers</a>
+
+<h2 class="h4 mt-4">Customer history</h2>
+<div class="row g-3">
+    <div class="col-md-4"><div class="card"><div class="card-header">Opportunities</div><ul class="list-group list-group-flush">@foreach (var item in Model.Opportunities.OrderByDescending(x => x.OpportunityId)) { <li class="list-group-item"><a asp-controller="Opportunities" asp-action="Details" asp-route-id="@item.OpportunityId">@item.OpportunityName</a> · @item.Stage · @item.Amount.ToString("C")</li> } @if (!Model.Opportunities.Any()) { <li class="list-group-item text-muted">None</li> }</ul></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-header">Follow-ups</div><ul class="list-group list-group-flush">@foreach (var item in Model.FollowUps.OrderByDescending(x => x.FollowUpDate)) { <li class="list-group-item"><a asp-controller="FollowUps" asp-action="Details" asp-route-id="@item.FollowUpId">@item.Subject</a> · @item.Status</li> } @if (!Model.FollowUps.Any()) { <li class="list-group-item text-muted">None</li> }</ul></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-header">Activities</div><ul class="list-group list-group-flush">@foreach (var item in Model.Activities.OrderByDescending(x => x.ActivityDate)) { <li class="list-group-item"><a asp-controller="Activities" asp-action="Details" asp-route-id="@item.ActivityId">@item.Subject</a> · @item.Status</li> } @if (!Model.Activities.Any()) { <li class="list-group-item text-muted">None</li> }</ul></div></div>
+</div>

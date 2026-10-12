@@ -84,7 +84,7 @@
         <nav class="navbar navbar-expand-lg crm-navbar shadow-sm">
             <div class="container-fluid px-lg-4">
 
-                <a class="navbar-brand crm-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                <a class="navbar-brand crm-brand" asp-area="" asp-controller="@(User.Identity?.IsAuthenticated == true ? "Home" : "Auth")" asp-action="@(User.Identity?.IsAuthenticated == true ? "Index" : "Login")">
                     Acxiom<span>CRM</span>
                 </a>
 
@@ -95,6 +95,8 @@
 
                 <div class="collapse navbar-collapse" id="crmNavbar">
 
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
                         <li class="nav-item">
@@ -134,18 +136,26 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="AuditLogs" asp-action="Index">
-                                Audit Logs
-                            </a>
+                            <a class="nav-link" asp-controller="Reports" asp-action="Index">Reports</a>
                         </li>
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Users" asp-action="Index">Users</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="AuditLogs" asp-action="Index">Audit Logs</a></li>
+                        }
 
                     </ul>
 
                     <div class="d-flex align-items-center gap-2">
-                        <span class="text-muted small d-none d-lg-inline">
-                            Customer Relationship Management
-                        </span>
+                        <span class="text-muted small">@User.Identity?.Name</span>
+                        <form asp-controller="Auth" asp-action="Logout" method="post"><button class="btn btn-outline-secondary btn-sm" type="submit">Sign out</button></form>
                     </div>
+                    }
+                    else
+                    {
+                        <div class="ms-auto d-flex gap-2"><a asp-controller="Auth" asp-action="Login" class="btn btn-outline-primary btn-sm">Sign in</a><a asp-controller="Auth" asp-action="Register" class="btn btn-primary btn-sm">Register</a></div>
+                    }
 
                 </div>
             </div>
@@ -154,6 +164,8 @@
 
     <div class="container-fluid px-lg-4">
         <main role="main" class="crm-main">
+            @if (TempData["Success"] is string success) { <div class="alert alert-success alert-dismissible fade show" role="alert">@success<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div> }
+            @if (TempData["Error"] is string error) { <div class="alert alert-danger alert-dismissible fade show" role="alert">@error<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div> }
             @RenderBody()
         </main>
     </div>

@@ -1,0 +1,9 @@
+@model IEnumerable<AcxiomCRM.Controllers.UserRowViewModel>
+@{ ViewData["Title"] = "User Management"; }
+<div class="d-flex justify-content-between align-items-center mb-3"><div><h1 class="h2">User Management</h1><p class="text-muted">Manage accounts, primary roles, and access status.</p></div><a asp-action="Create" class="btn btn-primary">Create user</a></div>
+@if (TempData["Success"] is string success) { <div class="alert alert-success">@success</div> }
+<form asp-action="Index" method="get" class="input-group mb-3"><input name="search" value="@ViewBag.Search" class="form-control" placeholder="Search name or email"/><button class="btn btn-outline-primary">Search</button></form>
+<div class="table-responsive"><table class="table table-striped align-middle"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Lockout</th><th></th></tr></thead><tbody>
+@foreach (var user in Model) { <tr><td>@user.DisplayName</td><td>@user.Email</td><td>@user.Roles</td><td>@(user.IsActive ? "Active" : "Inactive")</td><td>@(user.IsLockedOut ? "Locked" : "—")</td><td class="text-nowrap"><a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary">Edit</a> <a asp-action="ResetPassword" asp-route-id="@user.Id" class="btn btn-sm btn-outline-secondary">Reset password</a></td></tr> }
+</tbody></table></div>
+<nav aria-label="User pages"><ul class="pagination">@for (var i=1;i<=(int)ViewBag.PageCount;i++){<li class="page-item @(i==(int)ViewBag.Page?"active":"")"><a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-search="@ViewBag.Search">@i</a></li>}</ul></nav>
