@@ -61,6 +61,8 @@ dotnet restore
 dotnet run
 ```
 
+On Windows, you can double-click `start-crm.bat` instead. Keep the console window open while the app is running; press `Ctrl+C` there to stop it.
+
 The application applies pending EF Core migrations at startup and uses `acxiomcrm.db` in the application content root by default. Back up an existing database before running after a schema update.
 
 ## Provisioning an Admin User
