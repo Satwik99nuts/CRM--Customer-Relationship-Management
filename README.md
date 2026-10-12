@@ -11,6 +11,8 @@ A customer relationship management system built with ASP.NET Core MVC and Entity
 - Activity logging
 - Audit log viewing
 - User authentication and role-based administration
+- Role-scoped dashboards, searchable lists, reports, and CSV export
+- REST endpoints for customers, leads, opportunities, follow-ups, authentication, and pipeline reports
 - SQLite database support
 - ASP.NET Core MVC architecture
 
@@ -43,8 +45,8 @@ A customer relationship management system built with ASP.NET Core MVC and Entity
 ### Clone the repository
 
 ```bash
-git clone https://github.com/Satwik99nuts/CRM--Customer-Relationship-Management.git
-cd CRM--Customer-Relationship-Management
+git clone https://github.com/Satwik99nuts/CRM---Customer-Relationship-Management-.git
+cd CRM---Customer-Relationship-Management-
 ```
 
 ### Restore dependencies
@@ -59,7 +61,7 @@ dotnet restore
 dotnet run
 ```
 
-The application will start using the default SQLite database configured in `appsettings.json`.
+The application applies pending EF Core migrations at startup and uses `acxiomcrm.db` in the application content root by default. Back up an existing database before running after a schema update.
 
 ## Provisioning an Admin User
 
@@ -74,6 +76,10 @@ Then follow the prompts to enter the administrator email and password.
 ## Database
 
 The project uses SQLite with EF Core migrations. The database is created automatically when the app starts and migrations are applied.
+
+## API and assignment notes
+
+See [API_DOCUMENTATION.md](API_DOCUMENTATION.md) for routes, authentication, and request shapes. See [ASSIGNMENT_COMPLIANCE.md](ASSIGNMENT_COMPLIANCE.md) for the requirement checklist and manual evaluation steps.
 
 ## Notes
 
