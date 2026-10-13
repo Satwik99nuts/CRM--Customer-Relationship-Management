@@ -2,7 +2,6 @@
 setlocal
 
 set "APP_URL=http://localhost:5218"
-set "PROJECT=%~dp0AcxiomCRM.csproj"
 
 where dotnet >nul 2>nul
 if errorlevel 1 (
@@ -15,7 +14,7 @@ rem Reuse the app if it is already responding on the configured port.
 powershell -NoProfile -Command "try { $r = Invoke-WebRequest -Uri '%APP_URL%' -TimeoutSec 2 -UseBasicParsing; if ($r.StatusCode -ge 200 -and $r.StatusCode -lt 500) { exit 0 } } catch {}; exit 1" >nul 2>nul
 if errorlevel 1 (
     echo Starting AcxiomCRM...
-    start "AcxiomCRM server" /min cmd /k "cd /d ""%~dp0"" && set ASPNETCORE_ENVIRONMENT=Development && dotnet run --no-launch-profile --project ""%PROJECT%"""
+    start "AcxiomCRM server" /min cmd /k "cd /d ""%~dp0"" && set ASPNETCORE_ENVIRONMENT=Development && dotnet run --no-launch-profile"
 
     echo Waiting for AcxiomCRM to become ready...
     powershell -NoProfile -Command "$deadline = (Get-Date).AddSeconds(60); do { try { $r = Invoke-WebRequest -Uri '%APP_URL%' -TimeoutSec 2 -UseBasicParsing; if ($r.StatusCode -ge 200 -and $r.StatusCode -lt 500) { exit 0 } } catch {}; Start-Sleep -Seconds 1 } while ((Get-Date) -lt $deadline); exit 1"
